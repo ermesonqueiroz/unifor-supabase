@@ -1,45 +1,34 @@
-//import express from 'express';
+require('dotenv').config();
+
 const express = require('express');
-
-//import createClient from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-//import {createClient} from '@supabase/supabase-js'
 const supabaseClient = require('@supabase/supabase-js');
-
-//import morgan from 'morgan';
 const morgan = require('morgan');
-
-//import bodyParser from "body-parser";
-const bodyParser = require('body-parser');
-
-//import { createClient } from "https://cdn.skypack.dev/@supabase/supabase-js";
+const cors = require("cors");
 
 const app = express();
 
-const cors=require("cors");
-const corsOptions ={
-   origin:'*', 
-   credentials:true,            //access-control-allow-credentials:true
-   optionSuccessStatus:200,
-}
+const corsOptions = {
+    origin: '*', 
+    credentials: true,
+    optionSuccessStatus: 200,
+};
 
-app.use(cors(corsOptions)) // Use this after the variable declaration
-
-
-// using morgan for logs
+app.use(cors(corsOptions))
 app.use(morgan('combined'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(bodyParser.json());
-
-const supabase = 
-    supabaseClient.createClient('https://minhaurl', 
-        'minhaAPIKey')
+const supabase = supabaseClient.createClient(
+    process.env.SUPABASE_API_URL, 
+    process.env.SUPABASE_API_KEY
+);
 
 
 app.get('/products', async (req, res) => {
-    const {data, error} = await supabase
+    const { data } = await supabase
         .from('products')
-        .select()
+        .select();
+
     res.send(data);
     console.log(`lists all products${data}`);
 });
@@ -70,7 +59,6 @@ app.post('/products', async (req, res) => {
     console.log("retorno "+ req.body.name);
     console.log("retorno "+ req.body.description);
     console.log("retorno "+ req.body.price);
-
 });
 
 app.put('/products/:id', async (req, res) => {
@@ -110,6 +98,6 @@ app.get('*', (req, res) => {
     res.send("Hello again I am working my friend to the moon and behind <3");
 });
 
-app.listen(3000, () => {
-    console.log(`> Ready on http://localhost:3000`);
+app.listen(process.env.PORT || 3000, () => {
+    console.log(`> Ready on http://localhost:${process.env.PORT || 3000}`);
 });
